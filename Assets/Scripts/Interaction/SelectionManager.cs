@@ -4,10 +4,7 @@ public class SelectionManager : MonoBehaviour
 {
     [SerializeField] private Camera mainCamera;
     [SerializeField] private LayerMask raycastMask = ~0;
-    [SerializeField] private HighlightController highlightController;
-    [SerializeField] private OutlineController outlineController;
-
-    private SelectableObject _currentSelection;
+    [SerializeField] private RenderEffectPresenter renderEffectPresenter;
 
     private void Update()
     {
@@ -29,40 +26,16 @@ public class SelectionManager : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, 1000f, raycastMask))
         {
-            SelectableObject selectable = hit.collider.GetComponent<SelectableObject>();
-            if (selectable != null)
+            RenderEffectTarget effectTarget = hit.collider.GetComponent<RenderEffectTarget>();
+            if (effectTarget != null)
             {
-                _currentSelection = selectable;
-                Debug.Log($"Selected: {_currentSelection.DisplayName}");
-
-                HighlightTarget highlightTarget = hit.collider.GetComponent<HighlightTarget>();
-                if (highlightTarget != null && highlightController != null)
-                {
-                    highlightController.SetCurrentTarget(highlightTarget);
-                }
-
-                OutlineTarget outlineTarget = hit.collider.GetComponent<OutlineTarget>();
-                if (outlineTarget != null && outlineController != null)
-                {
-                    outlineController.SetCurrentTarget(outlineTarget);
-                }
-
+                renderEffectPresenter?.SetCurrentTarget(effectTarget);
+                Debug.Log($"Selected: {effectTarget.GetComponent<SelectableObject>().DisplayName}");
                 return;
             }
         }
 
-        _currentSelection = null;
-
-        if (highlightController != null)
-        {
-            highlightController.ClearCurrentTarget();
-        }
-
-        if (outlineController != null)
-        {
-            outlineController.ClearCurrentTarget();
-        }
-
+        renderEffectPresenter?.ClearCurrentTarget();
         Debug.Log("Selection cleared.");
     }
 }
