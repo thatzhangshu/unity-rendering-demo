@@ -7,6 +7,8 @@ public static class OutlineTargetRegistry
 
     public static IReadOnlyCollection<OutlineTarget> Targets => TargetsInternal;
 
+    public static bool HasOutlinedTargets => TargetsInternal.Count > 0;
+
     public static void Register(OutlineTarget target)
     {
         if (target != null)

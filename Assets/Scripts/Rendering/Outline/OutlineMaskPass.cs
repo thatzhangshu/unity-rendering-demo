@@ -5,27 +5,34 @@ using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public sealed class OutlineMaskPass:ScriptableRenderPass, IDisposable
+public sealed class OutlineMaskPass :
+    ScriptableRenderPass,
+    IDisposable
 {
     private const string ProfilerTag = "Outline Mask Pass";
     private const string MaskTextureName = "_ScreenSpaceOutlineMask";
 
     private static readonly int MaskTextureId = Shader.PropertyToID(MaskTextureName);
 
+    private static readonly int VisibleOnlyId = Shader.PropertyToID("_ScreenSpaceOutlineVisibleOnly");
+
+    private static readonly int DepthBiasId = Shader.PropertyToID("_ScreenSpaceOutlineDepthBias");
+
     private readonly Material _maskMaterial;
     private readonly ProfilingSampler _profilingSampler;
     private readonly List<Material> _sharedMaterials = new();
-
+    private bool _visibleOnly;
+    private float _depthBias;
     private RTHandle _maskTexture;
 
-    public RTHandle MaskTexture => _maskTexture;
-
-    public OutlineMaskPass(Material maskMaterial,RenderPassEvent passEvent)
+    public OutlineMaskPass(
+        Material maskMaterial,
+        RenderPassEvent passEvent)
     {
         _maskMaterial = maskMaterial;
         _profilingSampler = new ProfilingSampler(ProfilerTag);
         renderPassEvent = passEvent;
-    }
+    } 
 
     public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
     {
@@ -76,6 +83,14 @@ public sealed class OutlineMaskPass:ScriptableRenderPass, IDisposable
         {
             using (new ProfilingScope(cmd, _profilingSampler))
             {
+                cmd.SetGlobalFloat(
+                    VisibleOnlyId,
+                    _visibleOnly ? 1.0f : 0.0f);
+
+                cmd.SetGlobalFloat(
+                    DepthBiasId,
+                    _depthBias);
+                    
                 foreach (OutlineTarget target in OutlineTargetRegistry.Targets)
                 {
                     if (!CanRenderTarget(target, out Renderer targetRenderer))
@@ -110,5 +125,19 @@ public sealed class OutlineMaskPass:ScriptableRenderPass, IDisposable
     {
         _maskTexture?.Release();
         _maskTexture = null;
+    }
+    public void ConfigureOcclusion(
+        OutlineOcclusionMode occlusionMode,
+        float depthBias)
+    {
+        _visibleOnly =
+            occlusionMode == OutlineOcclusionMode.VisibleOnly;
+
+        _depthBias = Mathf.Max(0.0f, depthBias);
+
+        ConfigureInput(
+            _visibleOnly
+                ? ScriptableRenderPassInput.Depth
+                : ScriptableRenderPassInput.None);
     }
 }

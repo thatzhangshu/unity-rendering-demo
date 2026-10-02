@@ -78,7 +78,9 @@ public class RenderEffectPresenter : MonoBehaviour
 
         if (hintText != null)
         {
-            hintText.text = "Left Click: Select | F: Dissolve | G: Reset Dissolve";
+            hintText.text =
+                "Left Click: Select | F/G: Dissolve/Reset\n" +
+                "O: Outline | M: Occlusion | [ ]: Width";
         }
     }
 
