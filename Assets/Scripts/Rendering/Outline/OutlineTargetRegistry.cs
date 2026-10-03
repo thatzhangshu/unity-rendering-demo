@@ -3,15 +3,16 @@ using UnityEngine;
 
 public static class OutlineTargetRegistry
 {
-    private static readonly HashSet<OutlineTarget> TargetsInternal = new();
+    private static readonly List<OutlineTarget> TargetsInternal = new();
 
-    public static IReadOnlyCollection<OutlineTarget> Targets => TargetsInternal;
+    public static IReadOnlyList<OutlineTarget> Targets =>
+        TargetsInternal;
 
     public static bool HasOutlinedTargets => TargetsInternal.Count > 0;
 
     public static void Register(OutlineTarget target)
     {
-        if (target != null)
+        if (target != null && !TargetsInternal.Contains(target))
         {
             TargetsInternal.Add(target);
         }

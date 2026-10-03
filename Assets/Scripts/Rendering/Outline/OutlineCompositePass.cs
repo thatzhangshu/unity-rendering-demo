@@ -65,7 +65,7 @@ public sealed class OutlineCompositePass : ScriptableRenderPass
         }
 
         CommandBuffer cmd =
-            CommandBufferPool.Get(ProfilerTag);
+            CommandBufferPool.Get();
 
         try
         {

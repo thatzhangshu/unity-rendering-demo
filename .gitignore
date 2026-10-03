@@ -10,6 +10,9 @@ MemoryCaptures/
 
 Recordings/
 
+# Local Profile Analyzer captures
+*.pdata
+
 # Addressables / generated
 ServerData/
 

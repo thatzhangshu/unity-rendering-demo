@@ -77,7 +77,7 @@ public sealed class OutlineMaskPass :
             return;
         }
 
-        CommandBuffer cmd = CommandBufferPool.Get(ProfilerTag);
+        CommandBuffer cmd = CommandBufferPool.Get();
 
         try
         {
@@ -90,9 +90,15 @@ public sealed class OutlineMaskPass :
                 cmd.SetGlobalFloat(
                     DepthBiasId,
                     _depthBias);
+                
+                IReadOnlyList<OutlineTarget> targets = OutlineTargetRegistry.Targets;
                     
-                foreach (OutlineTarget target in OutlineTargetRegistry.Targets)
+                for (int targetIndex = 0;
+                    targetIndex < targets.Count;
+                    targetIndex++)
                 {
+                    OutlineTarget target = targets[targetIndex];
+
                     if (!CanRenderTarget(target, out Renderer targetRenderer))
                     {
                         continue;
